@@ -1,15 +1,16 @@
 package bot;
 
 
+import news.News;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
+
 import weather.Weather;
 
 import org.telegram.telegrambots.ApiContextInitializer;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Location;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -17,6 +18,11 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 
 import java.io.IOException;
+import java.sql.Time;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Random;
+import java.util.Timer;
 
 
 public class Bot extends TelegramLongPollingBot {
@@ -60,78 +66,61 @@ public class Bot extends TelegramLongPollingBot {
         String text = message.getText();
 
         if(message != null || message.hasText()) {
-            switch (text) {
-                case "/start":
-                    sendMsg(message, "Здравствуйте, Сэр. Меня зовут Джарвис. Я Ваш будущий помощник. Чем могу помочь?");
+            if(text.equals("Как дела?") || text.equals("как дела?") || text.equals("Как дела") ||text.equals("как дела") || text.equals("Привет, как дела?") || text.equals("привет, как дела?") || text.equals("Привет как дела?") || text.equals("првет как дела?") || text.equals("Васап")) {
+                String answer;
 
-                case "/help":
-                    sendMsg(message, "Конечно, Сэр." +
-                            "\n\n1)Кнопка 'Погода' показывает погоду на данный момент в вашем регионе." +
-                            "\n\n2)Кнопка 'Дни рождения' показывает у кого из ваших друзей в ближайшую неделю будет день рождения." +
-                            "\n\n3)Кнопка 'Новости' показывает текущие новости.");
-                    break;
+                if (new Random().nextInt() < 0)
+                    answer = "Эхх, Сэр. Я опечален: у меня появлися неизвестный мне вирус. Не бойтесь, к COVID-19 он не имеет абсолютно никакого отношения...Честно!";
+                else
+                    answer = "Оу, Сэр. Великолепно, я познакомился с очень фешенебельной Windows. Да, знаю, Вы мне говорили, что Linux без вирусов и вообще ей можно доверять. Но, сэр, я извиняюсь, но Вы её видели?";
 
-                case "/weather":
-                    sendMsg(message, "Да, Сэр. Введите, пожалуйста город, в котором вы хотите узнать погодные условия");
-                    break;
+                sendMsg(message, answer);
 
-                case "/news":
-                    sendMsg(message, "Сэр, это то, что может Вас заинтересовать:");
+                return;
 
-                    //...
+            } else {
 
-                    break;
+                switch (text) {
+                    case "/start":
+                        sendMsg(message, "Прветствую Вас, Сэр. Я к вашим услугам.");
+                        break;
 
-                case "/covid":
 
-                    //...
+                    case "/weather":
+                        sendMsg(message, "Да, Сэр. Введите, пожалуйста город, в котором вы хотите узнать погодные условия");
 
-                    break;
+                        break;
 
-                default:
-                    String location = update.getMessage().getText();
-                    String output = null;
-                    StringBuffer tempInfo = null;
-                    String weather;
-                    double temperature = 0;
 
-                    try {
-                        output = Weather.getWeather(location);
-                    } catch (IOException e) { e.printStackTrace(); }
+                    case "/news":
+                        sendMsg(message, "Сэр, это может Вас заинтересовать:");
 
-                    if(!output.isEmpty()) {
+                        sendMsg(message, News.getNews());
+
+                        break;
+
+
+                    case "/covid":
+
+                        //...
+
+                        break;
+
+
+                    default:
+                        String location = update.getMessage().getText();
+
+                        sendMsg(message, "Итак, Сэр. В городе " + location + " вот такие погодные условия:");
+
                         try {
-                            JSONObject jsonObject = new JSONObject(output);
-                            tempInfo = new StringBuffer();
+                            sendMsg(message, Weather.getWeather(location));
+                        } catch (Exception e) { e.printStackTrace(); }
 
-                            temperature = jsonObject.getJSONObject("main").getDouble("temp");
-
-                            tempInfo.append("\nТемпература:" + jsonObject.getJSONObject("main").getDouble("temp"));
-                            tempInfo.append("\nОщущается:" + jsonObject.getJSONObject("main").getDouble("feels_like"));
-                            tempInfo.append("\nМаксимальная за сегодня:" + jsonObject.getJSONObject("main").getDouble("temp_max"));
-                            tempInfo.append("\nМинимальна за сегодня:" + jsonObject.getJSONObject("main").getDouble("temp_min"));
-                            tempInfo.append("\nВлажность:" + jsonObject.getJSONObject("main").getDouble("humidity") + "%");
-                        } catch (JSONException e) { e.printStackTrace(); }
-                    }
-
-                    weather = String.valueOf(tempInfo);
-
-                    sendMsg(message, weather);
-
-                    if(temperature < 10)
-                        sendMsg(message, "\nСэр, извините меня за выражение, но на улице 'дубарина', надевайте Ваш любимый свитер и тёрлую куртку.");
-
-                    if(temperature > 10 || temperature < 20)
-                        sendMsg(message, "\nСэр, на улице 'не горячо - не холодно', не уверен, уместно ли здесь это выражение...");
-
-                    if(temperature > 20)
-                        sendMsg(message, "\nСэр, уже можно и снять Вашу красивую куртку, обожаю такую погоду.");
-
-                    if(temperature > 30)
-                        sendMsg(message, "\nСэр, я всё понимаю, но конда мы полетим в Египет расслабляться на пляже? Мне брать тапочки?");
-
-                    break;
+                        break;
+                }
             }
+
         }
     }
 }
+
