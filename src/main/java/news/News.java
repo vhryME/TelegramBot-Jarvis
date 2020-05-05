@@ -10,11 +10,12 @@ import java.net.URLConnection;
 
 public class News {
     public static String getNews() {
+        String news;
         String tempInfo;
         StringBuffer result = new StringBuffer();
 
         try {
-            URL url = new URL(" https://newsapi.org/v1/articles?source=bbc-news&sortBy=top&apiKey=7fb685746d324a21a8fb66e2739789cd");
+            URL url = new URL(" https://newsapi.org/v1/articles?source=bbc-news&sortBy=top&apiKey=e6568a1672fd47268ad9b16a6eaf5f0b");
             URLConnection urlCon = url.openConnection();
             BufferedReader buffReader = new BufferedReader(new InputStreamReader(urlCon.getInputStream()));
 
@@ -26,10 +27,12 @@ public class News {
             buffReader.close();
         } catch (Exception e) { e.printStackTrace(); }
 
-        return parseNews(String.valueOf(result));
+        news = getNewsParsed(result.toString());
+
+        return news;
     }
 
-    public static String parseNews(String output) {
+    public static String getNewsParsed(String output) {
         StringBuffer tempInfo = new StringBuffer();
 
         if (!output.isEmpty()) {
@@ -38,19 +41,17 @@ public class News {
             JSONArray articles = jsonObject.getJSONArray("articles");
 
             for (int i = 0; i < articles.length(); i++){
-                article = articles.optJSONObject(i);
+                article = articles.getJSONObject(i);
 
-                tempInfo.append("\nАвтор:" + article.optString("author"));
-                tempInfo.append("\nНазвание:" + article.optString("title"));
-                tempInfo.append("\nОписание:" + article.optString("description"));
-                tempInfo.append("\nИсточник:" + article.optString("url"));
-                tempInfo.append("\nИсточник с изображением:" + article.optString("urlToImage"));
-                tempInfo.append("\nОпубликовано в:" + article.optString("publishedAt"));
-                tempInfo.append("\n\nСодержимое:" + article.optString("content"));
+                tempInfo.append("\nАвтор:" + article.getString("author"));
+                tempInfo.append("\nНазвание:" + article.getString("title"));
+                tempInfo.append("\nОписание:" + article.getString("description"));
+                tempInfo.append("\nИсточник:" + article.getString("url"));
+                tempInfo.append("\nИсточник с изображением:" + article.getString("urlToImage") + "\n\n");
             }
         }
 
-        return String.valueOf(tempInfo);
+        return tempInfo.toString();
     }
 }
 
