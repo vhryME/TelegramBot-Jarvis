@@ -2,9 +2,6 @@ package bot;
 
 
 import news.News;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import weather.Weather;
 
@@ -17,12 +14,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 
-import java.io.IOException;
-import java.sql.Time;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Random;
-import java.util.Timer;
+import java.util.*;
 
 
 public class Bot extends TelegramLongPollingBot {
@@ -38,15 +30,12 @@ public class Bot extends TelegramLongPollingBot {
     }
 
 
-    //Return name of Bot and his token
     @Override
     public String getBotUsername() { return "MmalyjJBot"; }
     @Override
     public String getBotToken() { return "1286255929:AAFDAlfw_s0y_TECWM6i9a4_jsmngbwdeeE"; }
 
 
-    //Method for update your message and that sending
-    //Params: chatId - ID of chat, string - your message
     public void sendMsg(Message message, String text) {
         SendMessage sMessage = new SendMessage();
 
@@ -59,14 +48,13 @@ public class Bot extends TelegramLongPollingBot {
     }
 
 
-    //Meehod for receiving message
     @Override
     public void onUpdateReceived(Update update) {
         Message message = update.getMessage();
         String text = message.getText();
 
         if(message != null || message.hasText()) {
-            if(text.equals("Как дела?") || text.equals("как дела?") || text.equals("Как дела") ||text.equals("как дела") || text.equals("Привет, как дела?") || text.equals("привет, как дела?") || text.equals("Привет как дела?") || text.equals("првет как дела?") || text.equals("Васап")) {
+            if (text.equalsIgnoreCase("Как дела?") || text.equalsIgnoreCase("Как дела") || text.equalsIgnoreCase("Привет, как дела?") || text.equals("Васап") || text.equals("Чё как?")) {
                 String answer;
 
                 if (new Random().nextInt() < 0)
@@ -78,31 +66,30 @@ public class Bot extends TelegramLongPollingBot {
 
                 return;
 
-            } else {
+            } else if (text.equalsIgnoreCase("Погода") || text.equalsIgnoreCase("Покажи погоду") || text.equalsIgnoreCase("Погода.") || text.equalsIgnoreCase("Покажи погоду.")) {
+                text = "weather";
+
+            } else if (text.equalsIgnoreCase("Новости") || text.equalsIgnoreCase("Покажи новости") || text.equalsIgnoreCase("Новости.") || text.equalsIgnoreCase("Покажи новости."))
+                text = "news";
+
 
                 switch (text) {
-                    case "/start":
+                    case "start":
                         sendMsg(message, "Прветствую Вас, Сэр. Я к вашим услугам.");
+
                         break;
 
 
-                    case "/weather":
+                    case "weather":
                         sendMsg(message, "Да, Сэр. Введите, пожалуйста город, в котором вы хотите узнать погодные условия");
 
                         break;
 
 
-                    case "/news":
+                    case "news":
                         sendMsg(message, "Сэр, это может Вас заинтересовать:");
 
                         sendMsg(message, News.getNews());
-
-                        break;
-
-
-                    case "/covid":
-
-                        //...
 
                         break;
 
@@ -117,10 +104,9 @@ public class Bot extends TelegramLongPollingBot {
                         } catch (Exception e) { e.printStackTrace(); }
 
                         break;
-                }
             }
-
         }
     }
 }
+
 
